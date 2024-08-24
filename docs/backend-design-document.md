@@ -60,11 +60,9 @@ For more details on the frontend technology stack, see the [Frontend Frameworks 
 
 To minimize latency and reduce load on the Wikidata API, a caching strategy will be implemented on the server.
 
-For specifics on the chosen caching solution, refer to the [Caching Solution](technology-stack.md#3-backend-frameworks-and-tools) section in the Technology Stack document.
-
 ### Server-Side Caching
 
-- **In-Memory Cache**: Use a caching mechanism like Redis or application memory (considering Replit's environment limitations) to store recently retrieved county data.
+- **In-Memory Cache**: Use an in-memory caching mechanism implemented with a JavaScript Map to store recently retrieved county data.
 - **Cache Invalidation**: Implement a simple Time-To-Live (TTL) based invalidation strategy to keep the cache updated. This ensures that the data remains relatively fresh without overwhelming the cache storage.
 - **Cache Keys**: Use the county's unique identifier as the cache key.
 

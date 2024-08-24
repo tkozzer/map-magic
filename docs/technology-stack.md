@@ -49,10 +49,10 @@ For a detailed breakdown of the API endpoints, refer to the [API Structure and E
 - **Rationale**: PostgreSQL will be used as the database for the admin system, handling secure login and other admin-specific data.
 - **Benefits**: Robust, secure, and widely supported relational database system.
 
-### Caching Solution (Recommended)
-- **Recommendation**: **Redis** will be used as the caching solution.
-  - **Rationale**: Redis is a powerful, in-memory data structure store that supports scaling and can handle high-throughput operations.
-  - **Benefits**: Fast, supports a variety of data structures, and is well-suited for caching frequently accessed data, reducing load on the server.
+### Caching Solution
+- **In-Memory Cache**: Utilize a JavaScript Map for in-memory caching of frequently accessed data.
+  - **Rationale**: An in-memory cache provides fast access to recently retrieved data without the need for additional infrastructure.
+  - **Benefits**: Simple to implement, reduces load on external APIs, and improves response times for frequently requested data.
 
 ## 4. Deployment and Hosting
 
@@ -105,8 +105,8 @@ For a detailed breakdown of the API endpoints, refer to the [API Structure and E
 - **Future Consideration**: Monitor performance and scale horizontally if necessary by distributing the application across multiple Replit instances.
 
 ### Caching Strategy
-- **Tool**: **Redis** (as mentioned in the Caching Solution section).
-- **Rationale**: Redis will handle caching of frequently accessed data to improve response times and reduce server load.
+- **Tool**: **In-Memory Cache** (as mentioned in the Caching Solution section).
+- **Rationale**: The in-memory cache will handle caching of frequently accessed data to improve response times and reduce server load.
 - **Benefits**: Enhances performance, particularly under high traffic conditions.
 
 ## 9. Security
