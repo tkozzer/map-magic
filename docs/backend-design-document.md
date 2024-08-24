@@ -2,23 +2,26 @@
 
 ## Overview
 
-This document outlines the backend design for the Custom Map Application. The application is a browser-based tool that allows users to interact with a map of the United States, selecting and coloring counties. Users can also retrieve data about counties from Wikidata. This document covers the API structure, caching strategy, scalability considerations, security, and future-proofing.
+This document outlines the backend design for the Custom Map Application, which will be deployed on Replit. The application is a browser-based tool that allows users to interact with a map of the United States, selecting and coloring counties. Users can also retrieve data about counties from Wikidata. This document covers the API structure, caching strategy, scalability considerations, security, and future-proofing, with a specific focus on deployment in the Replit environment.
 
 ## Table of Contents
 
 1. [API Structure and Endpoints](#api-structure-and-endpoints)
 2. [Caching Strategy](#caching-strategy)
 3. [Rate Limiting](#rate-limiting)
-4. [Scalability](#scalability)
+4. [Scalability on Replit](#scalability-on-replit)
 5. [Security](#security)
 6. [Error Handling](#error-handling)
 7. [Future Considerations](#future-considerations)
 8. [Monitoring and Analytics](#monitoring-and-analytics)
-9. [Diagrams and Documentation](#diagrams-and-documentation)
+9. [Deployment on Replit](#deployment-on-replit)
+10. [Diagrams and Documentation](#diagrams-and-documentation)
 
 ## API Structure and Endpoints
 
 The backend will serve the frontend (a Vue application) by providing county data from Wikidata and handling requests for exporting map states. All APIs will use JSON as the data format.
+
+For more details on the frontend technology stack, see the [Frontend Frameworks and Libraries](technology-stack.md#2-frontend-frameworks-and-libraries) section in the Technology Stack document.
 
 ### Endpoints
 
@@ -57,9 +60,11 @@ The backend will serve the frontend (a Vue application) by providing county data
 
 To minimize latency and reduce load on the Wikidata API, a caching strategy will be implemented on the server.
 
+For specifics on the chosen caching solution, refer to the [Caching Solution](technology-stack.md#3-backend-frameworks-and-tools) section in the Technology Stack document.
+
 ### Server-Side Caching
 
-- **In-Memory Cache**: Use a caching mechanism like Redis or application memory to store recently retrieved county data.
+- **In-Memory Cache**: Use a caching mechanism like Redis or application memory (considering Replit's environment limitations) to store recently retrieved county data.
 - **Cache Invalidation**: Implement a simple Time-To-Live (TTL) based invalidation strategy to keep the cache updated. This ensures that the data remains relatively fresh without overwhelming the cache storage.
 - **Cache Keys**: Use the county's unique identifier as the cache key.
 
@@ -78,26 +83,27 @@ To prevent abuse, rate limiting will be implemented on all API endpoints.
   - **GET /county/:id**: 100 requests per minute per IP.
   - **POST /export/json** and **POST /export/image**: 10 requests per minute per IP.
 
-## Scalability
+## Scalability on Replit
 
-Given the possibility of thousands of concurrent users, the backend will be designed to scale both horizontally and vertically.
+Given the possibility of thousands of concurrent users, the backend will be designed to scale within Replit's environment.
 
 ### Horizontal Scaling
 
-- **Load Balancing**: Implement load balancing to distribute traffic across multiple server instances. Services like AWS Elastic Load Balancing (ELB) or NGINX can be used.
-- **Stateless Design**: The backend will be designed to be stateless, allowing easy replication across multiple instances.
+- **Replit Instances**: Replit projects (Repls) can be scaled by running multiple instances. Load balancing can be achieved through Replit's built-in load management or by distributing the workload across multiple Repls.
+- **Stateless Design**: The backend will be designed to be stateless, allowing easy replication across multiple Replit instances.
 
 ### Vertical Scaling
 
-- **Resource Allocation**: Increase server capacity (CPU, memory) as needed to handle higher loads.
+- **Resource Allocation**: While Replit has resource limits, consider upgrading the Replit plan to allocate more CPU and memory resources as needed to handle higher loads.
 
 ## Security
 
 Although no sensitive user data is involved, basic security practices will be followed.
 
+For detailed information on admin-specific security measures, see the [Security and Authentication](admin-design-document.md#security-and-authentication) section in the Admin Design Document.
 ### HTTPS
 
-- **SSL/TLS**: All API endpoints will be secured with HTTPS to protect data in transit.
+- **SSL/TLS**: Replit automatically provides HTTPS for Repls. Ensure all API endpoints are accessed via HTTPS to protect data in transit.
 
 ### API Keys
 
@@ -142,8 +148,22 @@ Robust error handling will be implemented to manage interactions with the Wikida
 
 ### Monitoring
 
-- **Performance Monitoring**: Use tools like New Relic or AWS CloudWatch to monitor server performance, including CPU usage, memory usage, and response times.
+- **Performance Monitoring**: Replit provides basic monitoring tools, but for more advanced monitoring, consider integrating third-party services like New Relic or Datadog.
 - **Cache Monitoring**: Monitor cache performance, including hit/miss rates and memory usage.
+
+## Deployment on Replit
+
+### Setting Up the Environment
+
+- **Project Structure**: Organize your Repl with directories for the backend code, static files (if any), and configuration files. Use a `.replit` file to define the entry point of the application.
+- **Environment Variables**: Store sensitive information such as API keys in Replit's environment variables.
+- **Port Configuration**: Ensure that the Express server listens on the port provided by Replit (`process.env.PORT`).
+
+### Deployment Process
+
+- **Automatic Deployment**: Replit supports automatic deployment when changes are pushed to the repository or made directly in the Replit editor.
+- **Testing**: Use Replit's built-in console and logs to test and debug the application before and after deployment.
+- **Scaling**: Consider Replit's paid plans for increased performance and the ability to run multiple instances of your Repl.
 
 ## Diagrams and Documentation
 
@@ -157,7 +177,7 @@ Robust error handling will be implemented to manage interactions with the Wikida
 
 ### Architecture Diagram
 
-- **Description**: This diagram will detail the overall architecture, including load balancers, caching, and server scaling.
+- **Description**: This diagram will detail the overall architecture, including Replit-specific deployment considerations, load balancing, caching, and server scaling.
 
 ---
 
