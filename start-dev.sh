@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# Start the backend and frontend
-npm run dev:backend & npm run dev:frontend
+# Start the backend
+npm run dev:backend &
+
+# Start the frontend development server
+cd frontend && npm install && npm run dev &
 
 # Wait for all background processes to finish
 wait

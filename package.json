@@ -12,7 +12,9 @@
     "dev": "./start-dev.sh",
     "dev:backend": "nodemon server.js",
     "dev:frontend": "cd frontend && npm run dev",
-    "install:all": "npm install && cd frontend && npm install"
+    "build": "cd frontend && npm install && npm run build",
+    "install:all": "npm install && cd frontend && npm install",
+    "start:prod": "NODE_ENV=production npm run build && NODE_ENV=production npm start"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +23,8 @@
     "axios": "^1.7.5",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "express-rate-limit": "^7.4.0"
+    "express-rate-limit": "^7.4.0",
+    "http-proxy-middleware": "^2.0.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

@@ -1,6 +1,12 @@
 import express from 'express';
-import axios from 'axios';
 import { cacheData, getCachedData } from '../utils/cache.js';
+import {
+    getPropertyValueBatch,
+    getLabel,
+    createWikipediaLink,
+    formatArea,
+    formatCoordinates
+} from '../utils/wikidataHelpers.js';
 
 const router = express.Router();
 
@@ -8,53 +14,41 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        // Check cache first
         const cachedData = await getCachedData(id);
         if (cachedData) {
+            console.log(`County data retrieved from cache for ID: ${id}`);
             return res.json(JSON.parse(cachedData));
         }
 
-        // If not in cache, fetch from Wikidata
-        // This is a placeholder query, you'll need to adjust it based on your data structure
-        const query = `
-            SELECT ?countyLabel ?population ?coordinates ?area ?country ?website ?capital ?osmRelation ?wikipedia WHERE {
-                wd:${id} rdfs:label ?countyLabel .
-                OPTIONAL { wd:${id} wdt:P1082 ?population . }
-                OPTIONAL { wd:${id} wdt:P625 ?coordinates . }
-                OPTIONAL { wd:${id} wdt:P2046 ?area . }
-                OPTIONAL { wd:${id} wdt:P17 ?country . }
-                OPTIONAL { wd:${id} wdt:P856 ?website . }
-                OPTIONAL { wd:${id} wdt:P36 ?capital . }
-                OPTIONAL { wd:${id} wdt:P402 ?osmRelation . }
-                OPTIONAL { wd:${id} wdt:P wikipedia . }
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
-            }
-        `;
+        const propertyIds = ['P1082', 'P625', 'P2046', 'P17', 'P856', 'P36', 'P402', 'P131'];
+        const countyData = await getPropertyValueBatch(id, propertyIds);
 
-        const response = await axios.get('https://query.wikidata.org/sparql', {
-            params: {
-                format: 'json',
-                query: query
-            }
-        });
+        let stateName = 'Unknown';
+        if (countyData.P131) {
+            stateName = await getLabel(countyData.P131.id);
+        }
 
-        const countyData = response.data.results.bindings[0];
+        const [countryLabel, capitalLabel, formattedArea, formattedCoordinates] = await Promise.all([
+            getLabel(countyData.P17?.id),
+            getLabel(countyData.P36?.id),
+            formatArea(countyData.P2046),
+            formatCoordinates(countyData.P625)
+        ]);
 
-        // Process the data into the required format
         const processedData = {
-            name: countyData.countyLabel?.value,
-            population: countyData.population?.value,
-            coordinates: countyData.coordinates?.value,
-            area: countyData.area?.value,
-            country: countyData.country?.value,
-            officialWebsite: countyData.website?.value,
-            capital: countyData.capital?.value,
-            osmRelationURL: countyData.osmRelation?.value,
-            wikipediaLink: countyData.wikipedia?.value
+            name: countyData.label,
+            population: countyData.P1082?.amount ? parseInt(countyData.P1082.amount.replace(/^\+/, ''), 10) : null,
+            coordinates: formattedCoordinates,
+            area: formattedArea,
+            country: countryLabel,
+            officialWebsite: countyData.P856,
+            capital: capitalLabel,
+            osmRelationURL: countyData.P402 ? `https://www.openstreetmap.org/relation/${countyData.P402}` : null,
+            wikipediaLink: createWikipediaLink(countyData.label, stateName)
         };
 
-        // Cache the result
         await cacheData(id, JSON.stringify(processedData));
+        console.log(`County data cached for ID: ${id}`);
 
         res.json(processedData);
     } catch (error) {

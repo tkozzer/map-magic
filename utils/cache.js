@@ -16,6 +16,7 @@ export const getCachedData = (key) => {
         return null;
     }
 
+    console.log(`Data retrieved from cache for key: ${key}`);
     return cachedItem.data;
 };
 
