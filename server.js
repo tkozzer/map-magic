@@ -24,11 +24,15 @@ app.use(express.json());
 app.set('trust proxy', 1);
 
 // Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+if (process.env.NODE_ENV === 'production') {
+    const limiter = rateLimit({
+        windowMs: 10 * 60 * 60 * 1000, // 10 hours
+        max: 10000 // limit each IP to 10000 requests per 10 hours
+    });
+    app.use(limiter);
+} else {
+    console.log('Rate limiting disabled for development');
+}
 
 // Routes
 app.use('/api/map', mapRoutes);

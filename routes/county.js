@@ -36,6 +36,7 @@ router.get('/:id', async (req, res) => {
         ]);
 
         const processedData = {
+            id: id, // Add the entity ID to the response
             name: countyData.label,
             population: countyData.P1082?.amount ? parseInt(countyData.P1082.amount.replace(/^\+/, ''), 10) : null,
             coordinates: formattedCoordinates,

@@ -26,7 +26,8 @@ async function getPropertyValueBatch(entityId, propertyIds) {
     if (data.entities?.[entityId]?.claims) {
         propertyIds.forEach(propertyId => {
             if (data.entities[entityId].claims[propertyId]) {
-                results[propertyId] = data.entities[entityId].claims[propertyId][0].mainsnak.datavalue.value;
+                const claim = data.entities[entityId].claims[propertyId][0];
+                results[propertyId] = claim.mainsnak.datavalue?.value || null;
             } else {
                 results[propertyId] = null;
             }
@@ -74,9 +75,21 @@ function createWikipediaLink(countyName, stateName) {
         console.warn('Missing county name or state name for Wikipedia link');
         return null;
     }
-    const formattedCountyName = countyName.replace(/ County$/, '').replace(/ /g, '_');
-    const formattedStateName = stateName.replace(/ /g, '_');
-    return `https://en.wikipedia.org/wiki/${formattedCountyName}_County,_${formattedStateName}`;
+
+    if (stateName === 'Alaska') {
+        // For Alaska, use the full division name with underscores
+        const formattedCountyName = countyName.replace(/ /g, '_');
+        return `https://en.wikipedia.org/wiki/${formattedCountyName},_Alaska`;
+    } else if (stateName === 'Louisiana') {
+        // Replace 'County' with 'Parish'
+        const formattedCountyName = countyName.replace(/ County$/, '_Parish').replace(/ /g, '_');
+        return `https://en.wikipedia.org/wiki/${formattedCountyName},_Louisiana`;
+    } else {
+        // Original logic for other states
+        const formattedCountyName = countyName.replace(/ County$/, '').replace(/ /g, '_');
+        const formattedStateName = stateName.replace(/ /g, '_');
+        return `https://en.wikipedia.org/wiki/${formattedCountyName}_County,_${formattedStateName}`;
+    }
 }
 
 async function formatArea(area) {
